@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Inkmark: Annotate Screenshots and Photos in Your Browser</title>
+    <meta
+      name="description"
+      content="Add arrows, boxes, highlights and text to a screenshot or photo, then download it or copy it. Free, no account needed, and your image is never uploaded."
+    />
+    <meta name="robots" content="index, follow" />
+    <meta name="theme-color" content="#141416" />
+    <meta name="color-scheme" content="dark" />
+    <link rel="canonical" href="https://inkmark.dev/" />
+
+    <!-- Paint the background before the stylesheet loads to avoid a white flash. -->
+    <style>
+      html,
+      body {
+        background: #141416;
+      }
+    </style>
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Inkmark" />
+    <meta property="og:title" content="Inkmark: Annotate Screenshots and Photos" />
+    <meta property="og:description" content="Add arrows, boxes, highlights and text to an image in your browser. Free, and your image is never uploaded." />
+    <meta property="og:url" content="https://inkmark.dev/" />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="Inkmark: Annotate Screenshots and Photos" />
+    <meta name="twitter:description" content="Add arrows, boxes, highlights and text to an image in your browser. Free, and your image is never uploaded." />
+
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="sitemap" type="application/xml" href="/sitemap.xml" />
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "Inkmark",
+      "url": "https://inkmark.dev/",
+      "applicationCategory": "MultimediaApplication",
+      "operatingSystem": "Any",
+      "browserRequirements": "Requires a modern browser with JavaScript enabled.",
+      "description": "Free tool for adding arrows, shapes, highlights and text to images. Runs in the browser; images are not uploaded.",
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+      "featureList": [
+        "Freehand drawing",
+        "Arrows, lines, rectangles and ellipses",
+        "Highlighter",
+        "Text labels",
+        "Undo and redo",
+        "Download as PNG",
+        "Copy to clipboard"
+      ]
+    }
+    </script>
+
+    <!-- Cloudflare Web Analytics: left commented out for local testing.
+         When you deploy, uncomment the block below and replace the token with
+         yours from Cloudflare dashboard > Analytics & Logs > Web Analytics.
+    <script
+      defer
+      src="https://static.cloudflareinsights.com/beacon.min.js"
+      data-cf-beacon='{"token": "YOUR_TOKEN_HERE"}'
+    ></script>
+    -->
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="/">
+        <img src="/favicon.svg" alt="" width="24" height="24" />
+        <span>Inkmark</span>
+      </a>
+      <nav>
+        <a href="/faq.html">FAQ</a>
+      </nav>
+    </header>
+
+    <div class="toolbar" id="toolbar" role="toolbar" aria-label="Annotation tools">
+      <button class="tool active" data-tool="pen" title="Pen (V)"><i data-lucide="pencil"></i> Pen</button>
+      <button class="tool" data-tool="highlighter" title="Highlighter (H)"><i data-lucide="highlighter"></i> Highlight</button>
+      <button class="tool" data-tool="arrow" title="Arrow (A)"><i data-lucide="move-up-right"></i> Arrow</button>
+      <button class="tool" data-tool="line" title="Line (L)"><i data-lucide="minus"></i> Line</button>
+      <button class="tool" data-tool="rect" title="Rectangle (R)"><i data-lucide="square"></i> Rect</button>
+      <button class="tool" data-tool="ellipse" title="Ellipse (O)"><i data-lucide="circle"></i> Ellipse</button>
+      <button class="tool" data-tool="text" title="Text (T)"><i data-lucide="type"></i> Text</button>
+
+      <span class="divider"></span>
+
+      <div class="control color-control" data-needs-image>
+        <span>Color</span>
+        <button
+          type="button"
+          class="swatch-trigger"
+          id="color-trigger"
+          aria-haspopup="dialog"
+          aria-expanded="false"
+          aria-controls="color-popover"
+          aria-label="Annotation color"
+          title="Color"
+        >
+          <span class="swatch-dot" id="color-dot"></span>
+        </button>
+        <div class="color-popover hidden" id="color-popover" role="dialog" aria-label="Choose a color">
+          <div class="swatches" id="swatches"></div>
+          <hex-color-picker id="color-picker"></hex-color-picker>
+          <label class="hex-row">
+            <span>Hex</span>
+            <hex-input id="color-hex" prefixed></hex-input>
+          </label>
+        </div>
+      </div>
+      <label class="control" data-needs-image>
+        <span>Size <output id="size-value">4px</output></span>
+        <input type="range" id="size" min="1" max="40" value="4" aria-label="Brush size" />
+      </label>
+
+      <span class="divider"></span>
+
+      <button class="action icon-only" data-action="undo" title="Undo (Ctrl+Z)" aria-label="Undo"><i data-lucide="undo-2"></i></button>
+      <button class="action icon-only" data-action="redo" title="Redo (Ctrl+Shift+Z)" aria-label="Redo"><i data-lucide="redo-2"></i></button>
+      <button class="action icon-only danger" data-action="clear" title="Clear all annotations" aria-label="Clear all annotations"><i data-lucide="trash-2"></i></button>
+
+      <span class="toolbar-end"></span>
+
+      <button class="action icon-only" data-action="remove-image" title="Start over with a different image" aria-label="Start over with a different image"><i data-lucide="image-plus"></i></button>
+      <button class="action" data-action="copy" title="Copy image to clipboard (Ctrl+C)"><i data-lucide="copy"></i> Copy</button>
+      <button class="action primary" data-action="download" title="Download PNG (Ctrl+S)"><i data-lucide="download"></i> Download</button>
+    </div>
+
+    <main class="stage" id="dropzone">
+      <div class="empty-state" id="empty-state">
+        <div class="dropbox">
+          <h1>Annotate a screenshot or photo</h1>
+          <p class="sub">
+            Add arrows, boxes, highlights and text, then download the result or copy it to
+            your clipboard.
+          </p>
+          <button class="action primary big" data-action="upload">
+            <i data-lucide="upload"></i> Choose an image
+          </button>
+          <p class="hint">or drop a file here, or paste with <kbd>Ctrl</kbd>+<kbd>V</kbd></p>
+        </div>
+        <p class="privacy-note">Your image is processed in your browser and is never uploaded.</p>
+      </div>
+      <canvas id="canvas" class="hidden" aria-label="Image annotation canvas"></canvas>
+      <input
+        class="text-input hidden"
+        id="text-input"
+        type="text"
+        placeholder="Type and press Enter"
+        maxlength="200"
+      />
+    </main>
+
+    <input type="file" id="file-input" accept="image/*" hidden />
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

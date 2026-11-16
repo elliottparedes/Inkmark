@@ -1,0 +1,10 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "inkmark",
+  "compatibility_date": "2026-11-13",
+  // Static site: serve the Vite build output. _headers and _redirects in
+  // public/ are copied into dist/ and honored by Workers static assets.
+  "assets": {
+    "directory": "./dist"
+  }
+}
